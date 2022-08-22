@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/WETH.sol": {
+      "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.1;\r\n\r\ncontract WETH {\r\n    address public owner;\r\n\r\n    mapping(address => uint256) public balances;\r\n\r\n    constructor() {\r\n        owner = msg.sender;\r\n    }\r\n\r\n    receive() external payable ValidMinValue(msg.value) {\r\n        balances[msg.sender] += msg.value;\r\n    }\r\n\r\n    fallback() external payable ValidMinValue(msg.value) {\r\n        balances[msg.sender] += msg.value;\r\n    }\r\n\r\n    function deposit() external payable ValidMinValue(msg.value) {\r\n        balances[msg.sender] += msg.value;\r\n    }\r\n\r\n    function withdraw(uint256 amount)\r\n        external\r\n        ValidMinValue(amount)\r\n        ValidMaxValue(amount, balances[msg.sender])\r\n        returns (uint256)\r\n    {\r\n        balances[msg.sender] -= amount;\r\n        (bool status, ) = msg.sender.call{ value: amount }(\"\");\r\n        require(status, \"the transaction failed\");\r\n        if (!status) {\r\n            balances[msg.sender] += amount;\r\n        }\r\n        return balances[msg.sender];\r\n    }\r\n\r\n    function balanceOf(address _address) external view returns (uint256) {\r\n        return balances[_address];\r\n    }\r\n\r\n    modifier ValidMinValue(uint256 value) {\r\n        require(value > 0, \"Enter a value greater than 0\");\r\n        _;\r\n    }\r\n\r\n    modifier ValidMaxValue(uint256 value, uint256 balance) {\r\n        require(value <= balance, \"Insufficient funds\");\r\n        _;\r\n    }\r\n}\r\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
